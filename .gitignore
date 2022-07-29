@@ -1,1 +1,5 @@
+# Ignore vcs settings
 .vscode/settings.json
+
+# Ignore py cache.
+*.pyc
