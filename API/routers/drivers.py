@@ -1,16 +1,20 @@
 from typing import Optional
-from fastapi import APIRouter
-from pydantic import BaseModel
+from fastapi import APIRouter, status, HTTPException
+from pydantic import BaseModel, Field
 
 DRIVERS = []
-router = APIRouter(prefix="/drivers", tags=["drivers"], responses={404: {"description": "Not found"}})
+router = APIRouter(prefix="/drivers", tags=["drivers"])
 
 
 class Driver(BaseModel):
-    name: str
-    age: int
+    name: str = Field(description="Driver's name.", min_length=1)
+    age: int = Field(description="Driver's age. Should be grather than 16.", gt=15)
     id: int
-    car_plate: Optional[str]
+    car_plate: Optional[str] = Field(description="Cars's plate. Should be a valid Mercosur plate type,", min_length=6)
+
+    # Example
+    class Config:
+        schema_extra = {"example": {"name": "Santiago", "age": 25, "id": 34682222, "car_plate": "abc123"}}
 
 
 @router.get("/")
@@ -18,19 +22,17 @@ def get_all_drivers():
     return DRIVERS
 
 
-@router.post("/")
+@router.post("/", status_code=status.HTTP_201_CREATED)
 def add_new_driver(driver: Driver):
+    """Add a driver."""
     DRIVERS.append(driver)
-    return {"status_code": 200, "description": "Driver added."}
+    return {"description": "Driver added."}
 
 
 @router.get("/search/")
 def get_driver(driver_id: int):
-    """Search driver by plate.
-    Args:
-        driver_plate (str): driver's plate.
-    """
+    """Search driver by plate."""
     for driver in DRIVERS:
         if driver.id == driver_id:
             return driver
-    return {"status_code": 404, "description": "Driver not found."}
+    raise HTTPException(status_code=404, detail="Driver not found.")
