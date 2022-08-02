@@ -71,7 +71,7 @@ def add_new_car(car: Car, db: Session = Depends(get_db), user: dict = Depends(ge
 
 
 @router.delete("/delete/")
-def delete_car(car_plate: str, db: Session = Depends(get_db), , user: dict = Depends(get_current_user)):
+def delete_car(car_plate: str, db: Session = Depends(get_db), user: dict = Depends(get_current_user)):
     """Delete a car."""
 
     check_user_logged(user)
