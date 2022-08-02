@@ -3,6 +3,8 @@ from database import SessionLocal, engine
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
+from routers.auth import get_current_user, get_user_exception
+
 
 router = APIRouter(prefix="/cars", tags=["cars"])
 
@@ -37,9 +39,12 @@ class Car(BaseModel):
         schema_extra = {"example": {"plate": "abc123", "color": "Green", "chassis": "526a48skq0a", "doors_quantity": 4,"insured":True}}
 
 @router.get("/")
-def get_all_cars(db : Session = Depends(get_db)):
+def get_all_cars(db : Session = Depends(get_db), user: dict = Depends(get_current_user)):
     """Get information from all cars recorded.
     """
+    if not user:
+        raise get_user_exception()
+
     return db.query(models.Cars).all()
 
 
