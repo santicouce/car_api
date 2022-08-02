@@ -1,6 +1,5 @@
-from lib2to3.pgen2 import driver
 from typing import Optional
-
+from sqlalchemy.exc import IntegrityError
 import models
 from database import SessionLocal, engine
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -53,9 +52,13 @@ def add_new_driver(driver: Driver, db: Session = Depends(get_db)):
     driver_model.age = driver.age
     driver_model.id = driver.id
     driver_model.car_plate = driver.car_plate
-    db.add(driver_model)
-    db.commit()
-    return {"description": "Driver added."}
+    try:
+        db.add(driver_model)
+        db.commit()
+    except IntegrityError:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail='Driver not added. Relational integrity of the database is affected.')
+
+    return {"status_code": 200, "description": "Driver added."}
 
 
 @router.get("/search/")
@@ -64,7 +67,7 @@ def get_driver(driver_id: int,  db: Session = Depends(get_db)):
     
     driver_model = db.query(models.Drivers).filter(models.Drivers.id == driver_id).first()
 
-    if not driver:
+    if not driver_model:
         raise HTTPException(status_code=404, detail="Driver not found.")
 
     return driver_model
