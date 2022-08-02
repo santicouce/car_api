@@ -36,3 +36,4 @@ class Cars(Base):
     chassis = Column(String(14))
     doors_quantity = Column(Integer)
     insured = Column(Boolean, default=True)
+    # TODO: Add FK. cars-driver
