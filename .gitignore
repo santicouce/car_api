@@ -3,3 +3,6 @@
 
 # Ignore py cache.
 *.pyc
+
+# Ignore env variables.
+env/test.env
